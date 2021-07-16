@@ -291,11 +291,16 @@ class Color {
         return p;
       };
 
+      const l = this._l / 100;
+      const h = this._h / 360;
+      const s = this._s / 100;
+
       let q = l < 0.5 ? l * (1 + s) : l + s - l * s;
       let p = 2 * l - q;
-      r = Math.floor(hueToRgb(p, q, h + 1 / 3) * 255);
-      g = Math.floor(hueToRgb(p, q, h) * 255);
-      b = Math.floor(hueToRgb(p, q, h - 1 / 3) * 255);
+
+      this._r = Math.floor(hueToRgb(p, q, h + 1 / 3) * 255);
+      this._g = Math.floor(hueToRgb(p, q, h) * 255);
+      this._b = Math.floor(hueToRgb(p, q, h - 1 / 3) * 255);
     }
   }
 
@@ -355,7 +360,8 @@ class Color {
   }
 
   set r(x) {
-    this._r = this._clamp(x, 0, 255);
+    this._r = Math.floor(this._clamp(x, 0, 255));
+    this._toHsl();
   }
 
   get g() {
@@ -363,7 +369,8 @@ class Color {
   }
 
   set g(x) {
-    this._g = this._clamp(x, 0, 255);
+    this._g = Math.floor(this._clamp(x, 0, 255));
+    this._toHsl();
   }
 
   get b() {
@@ -371,7 +378,8 @@ class Color {
   }
 
   set b(x) {
-    this._b = this._clamp(x, 0, 255);
+    this._b = Math.floor(this._clamp(x, 0, 255));
+    this._toHsl();
   }
 
   get a() {
@@ -379,7 +387,7 @@ class Color {
   }
 
   set a(x) {
-    this._b = this._clamp(x, 0, 1);
+    this._a = this._clamp(x, 0, 1);
   }
 
   get h() {
@@ -387,7 +395,8 @@ class Color {
   }
 
   set h(x) {
-    this._h = this._wrap(x, 0, 360);
+    this._h = Math.floor(this._wrap(x, 0, 360));
+    this._toRgb();
   }
 
   get s() {
@@ -395,7 +404,8 @@ class Color {
   }
 
   set s(x) {
-    this._s = this._clamp(x, 0, 100);
+    this._s = Math.floor(this._clamp(x, 0, 100));
+    this._toRgb();
   }
 
   get l() {
@@ -403,7 +413,8 @@ class Color {
   }
 
   set l(x) {
-    this._l = this._clamp(x, 0, 255);
+    this._l = Math.floor(this._clamp(x, 0, 255));
+    this._toRgb();
   }
 
   get monochrome() {

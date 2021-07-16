@@ -6,11 +6,12 @@
 class Sketch extends Engine {
   preload() {
     this._scl = 50; // size of each rectangle
-    this._sub_scl = 5;  // size of each sub rectangle
+    this._sub_scl = 2.5;  // size of each sub rectangle
     this._texture_scl = 10; // size of each texture rectangle
     this._d_hue = 10; // max hue variation
-    this._d_color = 1.5; // max r, g, b channel variation
-    this._noise_scl = 0.05;
+    this._d_color = 5; // max r, g, b channel variation
+    this._noise_scl = 0.1;
+    this._rect_noise_scl = 0.05;
     this._texture_noise_scl = 0.0025;
     this._border = 0.1;
   }
@@ -60,7 +61,7 @@ class Sketch extends Engine {
         // there's a lower chance for far rectangles to be shown
         if (n >= dist_percent) {
           // select color from palette
-          const index = Math.floor((this._noise(x, y, seed, 10000) + 1) / 2 * this._colors.length);
+          const index = Math.floor((this._noise(x, y, seed, 10000, 1000) + 1) / 2 * this._colors.length);
           const rect_color = this._colors[index];
           // rect displacement
           const dx = this._noise(x, y, seed, 20000) * this._scl / 150;
@@ -76,20 +77,29 @@ class Sketch extends Engine {
           for (let xr = 0; xr < this._scl; xr += this._sub_scl) {
             for (let yr = 0; yr < this._scl; yr += this._sub_scl) {
               // create new color and set the hex of the picked color from palette
-              let sub_color = new Color();
+              const sub_color = new Color();
               sub_color.hex = rect_color;
 
               // add global hue variance
               sub_color.h += d_hue;
               // add rect r, g, b variance
-              sub_color.h += this._noise(x + xr, y + yr, seed, 500000) * this._d_color;
-              sub_color.s += this._noise(x + xr, y + yr, seed, 600000) * this._d_color;
-              sub_color.l += this._noise(x + xr, y + yr, seed, 700000) * this._d_color;
+              sub_color.r += this._noise(x + xr, y + yr, seed, 500000, this._rect_noise_scl) * this._d_color;
+              sub_color.g += this._noise(x + xr, y + yr, seed, 600000, this._rect_noise_scl) * this._d_color;
+              sub_color.b += this._noise(x + xr, y + yr, seed, 700000, this._rect_noise_scl) * this._d_color;
+              sub_color.a += this._noise(x + xr, y + yr, seed, 800000, this._rect_noise_scl) * 0.2 + 0.8;
               // draw rect
-              this.ctx.fillStyle = sub_color.hsl;
+              this.ctx.fillStyle = sub_color.hsla;
               this.ctx.fillRect(xr, yr, this._sub_scl + 1, this._sub_scl + 1);
             }
           }
+
+          // draw outer line
+          const border_color = new Color();
+          border_color.hex = this._colors[index];
+          border_color.l = 0.2;
+          border_color.a = Math.abs(this._noise(x, y, seed, 900000, this._rect_noise_scl) * 0.1) + 0.05;
+          this.ctx.strokeStyle = border_color.rgba;
+          this.ctx.strokeRect(0, 0, this._scl, this._scl);
 
           this.ctx.restore();
         }
@@ -107,7 +117,7 @@ class Sketch extends Engine {
     // position is relative to bottom right corner
     this.ctx.save();
     this.ctx.fillStyle = "#322f2c80";
-    this.ctx.font = `${font_size}px Aqua`;
+    this.ctx.font = `${font_size}px Aqua-Grotesque`;
     this.ctx.textAlign = "right";
     this.ctx.textBaseline = "bottom";
     this.ctx.fillText("N°" + this._canvas_title, this.width - bottom, this.height - right);
