@@ -1,15 +1,18 @@
-/*
-* Each canvas is fully deterministic. You can generate a canvas with a set seed
+/**
+* Each canvas is fully deterministic. You can generate a canvas with a set seed.
+* Normally the seed is based on time, but you can set whatever you want (including strings).
 */
 
 class Sketch extends Engine {
   preload() {
     this._scl = 50; // size of each rectangle
     this._sub_scl = 5;  // size of each sub rectangle
+    this._texture_scl = 10; // size of each texture rectangle
     this._d_hue = 10; // max hue variation
-    this._d_color = 2; // max r, g, b channel variation
+    this._d_color = 1.5; // max r, g, b channel variation
     this._noise_scl = 0.05;
-    this._border = 0.15;
+    this._texture_noise_scl = 0.0025;
+    this._border = 0.1;
   }
 
   setup() {
@@ -40,6 +43,8 @@ class Sketch extends Engine {
 
     this.ctx.save();
     this.background("#fbefdf");
+    // draw texture
+    this._texture();
     // translating and scaling to accomodate border
     this.ctx.translate(this._border * this.width / 2, this._border * this.height / 2);
     this.ctx.scale(1 - this._border, 1 - this._border);
@@ -55,13 +60,13 @@ class Sketch extends Engine {
         // there's a lower chance for far rectangles to be shown
         if (n >= dist_percent) {
           // select color from palette
-          const index = Math.floor((this._noise(x, y, seed, 70000) + 1) / 2 * this._colors.length);
+          const index = Math.floor((this._noise(x, y, seed, 10000) + 1) / 2 * this._colors.length);
           const rect_color = this._colors[index];
           // rect displacement
-          const dx = this._noise(x, y, 10000) * this._scl / 150;
-          const dy = this._noise(x, y, 20000) * this._scl / 150;
+          const dx = this._noise(x, y, seed, 20000) * this._scl / 150;
+          const dy = this._noise(x, y, seed, 30000) * this._scl / 150;
           // rect rotation
-          const theta = this._noise(x, y, 30000) * Math.PI / 150;
+          const theta = this._noise(x, y, seed, 40000) * Math.PI / 150;
 
           this.ctx.save();
           // traslate to top right corner of rectangle
@@ -77,9 +82,9 @@ class Sketch extends Engine {
               // add global hue variance
               sub_color.h += d_hue;
               // add rect r, g, b variance
-              sub_color.h += this._noise(x + xr, y + yr, 400000) * this._d_color;
-              sub_color.s += this._noise(x + xr, y + yr, 500000) * this._d_color;
-              sub_color.l += this._noise(x + xr, y + yr, 600000) * this._d_color;
+              sub_color.h += this._noise(x + xr, y + yr, seed, 500000) * this._d_color;
+              sub_color.s += this._noise(x + xr, y + yr, seed, 600000) * this._d_color;
+              sub_color.l += this._noise(x + xr, y + yr, seed, 700000) * this._d_color;
               // draw rect
               this.ctx.fillStyle = sub_color.hsl;
               this.ctx.fillRect(xr, yr, this._sub_scl + 1, this._sub_scl + 1);
@@ -96,25 +101,25 @@ class Sketch extends Engine {
 
     // draw title
     // compute size and displacement
-    const font_size = this._border * this.width / 6;
-    const d_pos = this._border * this.width / 6;
-    // position is relative to top left corner
+    const font_size = this._border * this.width / 4;
+    const bottom = this._border * this.width / 6;
+    const right = this._border * this.width / 8;
+    // position is relative to bottom right corner
     this.ctx.save();
-
     this.ctx.fillStyle = "#322f2c80";
     this.ctx.font = `${font_size}px Aqua`;
-    this.ctx.textAlign = "left";
-    this.ctx.textBaseline = "top";
-    this.ctx.fillText("N°" + title, d_pos, d_pos);
-
+    this.ctx.textAlign = "right";
+    this.ctx.textBaseline = "bottom";
+    this.ctx.fillText("N°" + title, this.width - bottom, this.height - right);
     this.ctx.restore();
 
+    // stop looping, restart with click
     this.noLoop();
   }
 
   // generate noise, scaled to noise_scl so you don't have to multiply each time
-  _noise(x = 0, y = 0, z = 0, w = 0) {
-    return this._simplex.noise4D(x * this._noise_scl, y * this._noise_scl, z * this._noise_scl, w * this._noise_scl);
+  _noise(x = 0, y = 0, z = 0, w = 0, scl = this._noise_scl) {
+    return this._simplex.noise4D(x * scl, y * scl, z * scl, w * scl);
   }
 
   // generate the title by shuffling the seed. Once more is deterministic as
@@ -126,6 +131,21 @@ class Sketch extends Engine {
     title = Math.floor(title * 10 ** this._title_length).toString().padEnd(this._title_length, 0);
     title = title.split("").sort((_, i) => (this._noise(seed, i))).join("");
     return title;
+  }
+
+  // generate the texture for the background
+  _texture(seed) {
+    for (let x = 0; x < this.width; x += this._texture_scl) {
+      for (let y = 0; y < this.height; y += this._texture_scl) {
+        const lightness = (this._noise(x, y, seed, 100000, this._texture_noise_scl) + 1) / 2 * 30 + 50;
+        const alpha = 0.2;
+
+        this.ctx.save();
+        this.ctx.fillStyle = `hsla(45, 40%, ${lightness}%, ${alpha})`;
+        this.ctx.fillRect(x, y, this._texture_scl, this._texture_scl);
+        this.ctx.restore();
+      }
+    }
   }
 
   click() {
