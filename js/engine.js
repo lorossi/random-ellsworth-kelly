@@ -216,6 +216,9 @@ document.addEventListener("DOMContentLoaded", () => {
   canvas.addEventListener("touchmove", e => s.touchmove(e));
   // keyboard event listeners
   document.addEventListener("keydown", e => s.keydown(e));
+  // DOM event listener
+  const download_button = document.querySelector("#download");
+  download_button.addEventListener("click", e => s.download(e));
 });
 
 class Color {

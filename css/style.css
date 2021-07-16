@@ -24,18 +24,28 @@ a:visited, a:active {
   color: var(--visited-link-color);
 }
 
+.title {
+  font-size: var(--title-size);
+  text-align: center;
+  width: 100%;
+  padding-bottom: var(--text-size);
+
+  user-select: none;
+}
+
 .container {
   width: 100vw;
   height: 100vh;
 
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
 }
 
 #sketch {
-  height: 95vh;
-  width: 95vh;
+  height: 80vh;
+  width: 80vh;
 
   touch-action: none;
 }
@@ -56,13 +66,28 @@ a:visited, a:active {
   padding-right: 2vw;
 }
 
+#download {
+  color: #f94144;
+  text-decoration: none;
+  cursor: pointer;
+  user-select: none;
+
+  padding: 0.25rem 0.5rem 0.25rem 0.5rem;
+  border: 1px solid #f94144;
+  border-radius: 2px;
+}
+
 @media only screen and (max-width: 600px) {
   #sketch {
-    height: 95vw;
-    width: 95vw;
+    height: 90vw;
+    width: 90vw;
   }
 
-  .footer {
-    justify-content: center;
+  #download {
+    padding: 0.25rem;
+  }
+
+  .footer  {
+    justify-content: space-around;
   }
 }

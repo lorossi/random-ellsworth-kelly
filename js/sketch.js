@@ -39,7 +39,7 @@ class Sketch extends Engine {
     // setup noise
     this._simplex = new SimplexNoise(seed);
     const d_hue = this._noise(seed) * this._d_hue;
-    const title = this._title(seed);
+    this._canvas_title = this._title(seed);
 
     this.ctx.save();
     this.background("#fbefdf");
@@ -110,7 +110,7 @@ class Sketch extends Engine {
     this.ctx.font = `${font_size}px Aqua`;
     this.ctx.textAlign = "right";
     this.ctx.textBaseline = "bottom";
-    this.ctx.fillText("N°" + title, this.width - bottom, this.height - right);
+    this.ctx.fillText("N°" + this._canvas_title, this.width - bottom, this.height - right);
     this.ctx.restore();
 
     // stop looping, restart with click
@@ -150,5 +150,12 @@ class Sketch extends Engine {
 
   click() {
     this.loop();
+  }
+
+  download() {
+    // generate file title
+    const file_title = `random-ellsworth-kelly-${this._canvas_title}`;
+    // actual download
+    this.saveAsImage(file_title);
   }
 }
