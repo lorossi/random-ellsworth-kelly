@@ -23,13 +23,18 @@ class Sketch extends Engine {
     this._title_length = 11;
     // rgb values of color palette
     this._colors = [
-      "#f94144",
-      "#f3722c",
-      "#f8961e",
-      "#f9c74f",
-      "#90be6d",
-      "#43aa8b",
-      "#577590",
+      "#e8e03a",
+      "#96de46",
+      "#6ad178",
+      "#00adb4",
+      "#328bd5",
+      "#6273c5",
+      "#7261a3",
+      "#8c689a",
+      "#ce6978",
+      "#f26865",
+      "#fa8c00",
+      "#fa8c00",
     ];
   }
 
