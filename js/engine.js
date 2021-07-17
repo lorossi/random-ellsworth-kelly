@@ -222,16 +222,28 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 class Color {
-  constructor(r = 0, g = 0, b = 0, a = 1) {
-    this._r = r;
-    this._g = g;
-    this._b = b;
-    this._a = a;
+  constructor(a = 0, b = 0, c = 0, d = 0, rgb = true) {
+    if (rgb) {
+      this._r = a;
+      this._g = b;
+      this._b = c;
+      this._a = d;
 
-    this._h = undefined;
-    this._s = undefined;
-    this._l = undefined;
-    this._toHsl();
+      this._h = undefined;
+      this._s = undefined;
+      this._l = undefined;
+      this._toHsl();
+    } else {
+      this._h = a;
+      this._s = b;
+      this._l = c;
+      this._a = d;
+
+      this._r = undefined;
+      this._g = undefined;
+      this._b = undefined;
+      this._toRgb();
+    }
   }
 
   fromHSL(h, s, l) {
@@ -304,6 +316,7 @@ class Color {
     }
   }
 
+  // internal functions
   _toHex(dec) {
     dec = Math.floor(dec);
     return dec.toString(16).padStart(2, 0).toUpperCase();
@@ -323,6 +336,7 @@ class Color {
     return value;
   }
 
+  // setters and getters
   set hex(h) {
     this._r = this._toDec(h.slice(1, 3));
     this._g = this._toDec(h.slice(3, 5));
