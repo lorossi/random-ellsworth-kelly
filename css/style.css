@@ -25,10 +25,11 @@ a:visited, a:active {
 }
 
 .title {
+  position: absolute;
   font-size: var(--title-size);
   text-align: center;
   width: 100%;
-  padding-bottom: var(--text-size);
+  padding-top: var(--title-size);
 
   user-select: none;
 }
