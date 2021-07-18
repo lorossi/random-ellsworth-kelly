@@ -9,6 +9,8 @@ class Sketch extends Engine {
     this._sub_scl = 2.5;  // size of each sub rectangle
     this._texture_scl = 10; // size of each texture rectangle
     this._d_hue = 10; // max hue variation
+    this._d_sat = 5; // max saturation variation
+    this._d_light = 5; // max light variation
     this._d_color = 5; // max r, g, b channel variation
     this._noise_scl = 0.1;
     this._rect_noise_scl = 0.05;
@@ -18,7 +20,7 @@ class Sketch extends Engine {
 
   setup() {
     // maximum distance between rectangle and center
-    this._max_dist = (Math.SQRT2 / 2) * this.width;
+    this._max_dist = this.width;
     // title length
     this._title_length = 11;
     // rgb values of color palette
@@ -44,7 +46,9 @@ class Sketch extends Engine {
 
     // setup noise
     this._simplex = new SimplexNoise(seed);
-    const d_hue = this._noise(seed) * this._d_hue;
+    const d_hue = this._noise(seed, 50) * this._d_hue;
+    const d_sat = this._noise(seed, 200) * this._d_sat;
+    const d_light = this._noise(seed, 100) * this._d_light;
     this._canvas_title = this._title(seed);
 
     this.ctx.save();
@@ -59,10 +63,11 @@ class Sketch extends Engine {
       for (let y = 0; y < this.height; y += this._scl) {
         // compute total and relative distance between the center of the rectangle and the center
         //  of the canvas
-        const rect_dist = dist(x + this._scl / 2, y + this._scl / 2, this.width / 2, this.height / 2);
-        const dist_percent = ease(rect_dist / this._max_dist); // eased to add some variance
+        // manhattan distance
+        const rect_dist = Math.abs(x + this._scl / 2 - this.width / 2) + Math.abs(y + this._scl / 2 - this.height / 2);
+        const dist_percent = rect_dist / this._max_dist;
         // noise relative to position
-        const n = (this._noise(x, y, seed) + 1) / 2;
+        const n = ease((this._noise(x, y, seed) + 1) / 2);
         // there's a lower chance for far rectangles to be shown
         if (n >= dist_percent) {
           // select color from palette
@@ -85,13 +90,16 @@ class Sketch extends Engine {
               const sub_color = new Color();
               sub_color.hex = rect_color;
 
-              // add global hue variance
+              // add global h, s, l variance
               sub_color.h += d_hue;
+              sub_color.s += d_sat;
+              sub_color.l += d_light;
               // add rect r, g, b variance
               sub_color.r += this._noise(x + xr, y + yr, seed, 500000, this._rect_noise_scl) * this._d_color;
               sub_color.g += this._noise(x + xr, y + yr, seed, 600000, this._rect_noise_scl) * this._d_color;
               sub_color.b += this._noise(x + xr, y + yr, seed, 700000, this._rect_noise_scl) * this._d_color;
               sub_color.a += this._noise(x + xr, y + yr, seed, 800000, this._rect_noise_scl) * 0.2 + 0.8;
+              // add rect s, l variance
               // draw rect
               this.ctx.fillStyle = sub_color.hsla;
               this.ctx.fillRect(xr, yr, this._sub_scl + 1, this._sub_scl + 1);
@@ -144,7 +152,7 @@ class Sketch extends Engine {
     let title = (this._noise(seed, Math.PI, Math.E, Math.SQRT1_2) + 1) / 2;
     // round it to desired digits
     title = Math.floor(title * 10 ** this._title_length).toString().padEnd(this._title_length, 0);
-    title = title.split("").sort((_, i) => (this._noise(seed, i))).join("");
+    title = title.split("").sort((_, i) => (this._noise(seed, i, 0, 0, 10000))).join("");
     return title;
   }
 
