@@ -1,23 +1,19 @@
 /**
 * Each canvas is fully deterministic. You can generate a canvas with a set seed.
 * Normally the seed is based on time, but you can set whatever you want (including strings).
-* The random function is basically a noise function. It doesn't really make a lot of sense,
-*   but works fine enough. It's an improper use of such function but since I am already using
-*   it for the texture and for the drawing, I figure out that it could be used to proper 
-*   random generation as well.
+* I implemented my own version of XOR128.
 */
 
 class Sketch extends Engine {
   preload() {
     this._scl = 25; // size of each rectangle
-    this._sub_scl = 2.5;  // size of each sub rectangle
+    this._sub_scl = 5;  // size of each sub rectangle
     this._texture_scl = 10; // size of each texture rectangle
     this._d_hue = 10; // max hue variation
     this._d_sat = 5; // max saturation variation
     this._d_light = 5; // max light variation
     this._d_color = 5; // max r, g, b channel variation
-    this._noise_scl = 0.1;
-    this._rect_noise_scl = 0.05;
+    this._rect_noise_scl = 1;
     this._texture_noise_scl = 0.0025;
     this._border = 0.1;
   }
@@ -50,9 +46,12 @@ class Sketch extends Engine {
 
     // setup noise
     this._simplex = new SimplexNoise(seed);
-    const d_hue = this._noise(seed, 50) * this._d_hue;
-    const d_sat = this._noise(seed, 200) * this._d_sat;
-    const d_light = this._noise(seed, 100) * this._d_light;
+    // setup random
+    this._xor128 = new XOR128(seed, seed + 1, seed + 2, seed + 3);
+    // init variables
+    const d_hue = this._random();
+    const d_sat = this._random();
+    const d_light = this._random();
     this._canvas_title = this._title(seed);
 
     this.ctx.save();
@@ -75,13 +74,13 @@ class Sketch extends Engine {
         // there's a lower chance for far rectangles to be shown
         if (n >= dist_percent) {
           // select color from palette
-          const index = Math.floor((this._noise(x, y, seed, 10000, 1000) + 1) / 2 * this._colors.length);
+          const index = Math.floor(this._random() * this._colors.length);
           const rect_color = this._colors[index];
           // rect displacement
-          const dx = this._noise(x, y, seed, 20000) * this._scl / 150;
-          const dy = this._noise(x, y, seed, 30000) * this._scl / 150;
+          const dx = this._random() * this._scl / 150;
+          const dy = this._random() * this._scl / 150;
           // rect rotation
-          const theta = this._noise(x, y, seed, 40000) * Math.PI / 150;
+          const theta = this._random() * Math.PI / 150;
 
           this.ctx.save();
           // traslate to top right corner of rectangle
@@ -99,10 +98,10 @@ class Sketch extends Engine {
               sub_color.s += d_sat;
               sub_color.l += d_light;
               // add rect r, g, b variance
-              sub_color.r += this._noise(x + xr, y + yr, seed, 500000, this._rect_noise_scl) * this._d_color;
-              sub_color.g += this._noise(x + xr, y + yr, seed, 600000, this._rect_noise_scl) * this._d_color;
-              sub_color.b += this._noise(x + xr, y + yr, seed, 700000, this._rect_noise_scl) * this._d_color;
-              sub_color.a += this._noise(x + xr, y + yr, seed, 800000, this._rect_noise_scl) * 0.2 + 0.8;
+              sub_color.r += this._noise(x + xr, y + yr, seed, 1000, this._rect_noise_scl) * this._d_color;
+              sub_color.g += this._noise(x + xr, y + yr, seed, 2000, this._rect_noise_scl) * this._d_color;
+              sub_color.b += this._noise(x + xr, y + yr, seed, 3000, this._rect_noise_scl) * this._d_color;
+              sub_color.a += this._noise(x + xr, y + yr, seed, 4000, this._rect_noise_scl) * 0.2 + 0.8;
               // add rect s, l variance
               // draw rect
               this.ctx.fillStyle = sub_color.hsla;
@@ -114,7 +113,7 @@ class Sketch extends Engine {
           const border_color = new Color();
           border_color.hex = this._colors[index];
           border_color.l = 0.2;
-          border_color.a = Math.abs(this._noise(x, y, seed, 900000, this._rect_noise_scl) * 0.1) + 0.05;
+          border_color.a = Math.abs(this._noise(x, y, seed, 5000, this._rect_noise_scl) * 0.1) + 0.05;
           this.ctx.strokeStyle = border_color.rgba;
           this.ctx.strokeRect(0, 0, this._scl, this._scl);
 
@@ -145,8 +144,13 @@ class Sketch extends Engine {
   }
 
   // generate noise, scaled to noise_scl so you don't have to multiply each time
-  _noise(x = 0, y = 0, z = 0, w = 0, scl = this._noise_scl) {
+  _noise(x = 0, y = 0, z = 0, w = 0, scl = 0.1) {
     return this._simplex.noise4D(x * scl, y * scl, z * scl, w * scl);
+  }
+
+  // returns a random number between 0 and 1
+  _random() {
+    return this._xor128.random();
   }
 
   // generate the title by shuffling the seed. Once more is deterministic as
@@ -156,23 +160,25 @@ class Sketch extends Engine {
     let title = (this._noise(seed, Math.PI, Math.E, Math.SQRT1_2) + 1) / 2;
     // round it to desired digits
     title = Math.floor(title * 10 ** this._title_length).toString().padEnd(this._title_length, 0);
-    title = title.split("").sort((_, i) => (this._noise(seed, i, 0, 0, 10000))).join("");
+    this._xor128.shuffle_string(title);
     return title;
   }
 
   // generate the texture for the background
   _texture(seed) {
+    this.ctx.save();
+    this.ctx.globalCompositeOperation = "multiply";
     for (let x = 0; x < this.width; x += this._texture_scl) {
       for (let y = 0; y < this.height; y += this._texture_scl) {
-        const lightness = (this._noise(x, y, seed, 100000, this._texture_noise_scl) + 1) / 2 * 30 + 50;
+        const lightness = (this._noise(x, y, seed, 5000, this._texture_noise_scl) + 1) / 2 * 100 + 20;
         const alpha = 0.2;
-
         this.ctx.save();
         this.ctx.fillStyle = `hsla(45, 40%, ${lightness}%, ${alpha})`;
         this.ctx.fillRect(x, y, this._texture_scl, this._texture_scl);
         this.ctx.restore();
       }
     }
+    this.ctx.restore();
   }
 
   click() {
