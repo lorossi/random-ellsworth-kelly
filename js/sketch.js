@@ -1,11 +1,15 @@
 /**
 * Each canvas is fully deterministic. You can generate a canvas with a set seed.
 * Normally the seed is based on time, but you can set whatever you want (including strings).
+* The random function is basically a noise function. It doesn't really make a lot of sense,
+*   but works fine enough. It's an improper use of such function but since I am already using
+*   it for the texture and for the drawing, I figure out that it could be used to proper 
+*   random generation as well.
 */
 
 class Sketch extends Engine {
   preload() {
-    this._scl = 50; // size of each rectangle
+    this._scl = 25; // size of each rectangle
     this._sub_scl = 2.5;  // size of each sub rectangle
     this._texture_scl = 10; // size of each texture rectangle
     this._d_hue = 10; // max hue variation
