@@ -1,14 +1,14 @@
 # Random Ellsworth Kelly
 
+## Try it here! [lorenzoros.si](https://www.lorenzoros.si/ellsworth-kelly)
+
 ## Output
 
-![output-1](output/random-ellsworth-kelly-46831012944.png)
+![output-1](output/random-ellsworth-kelly-46831012944-resized.png)
+![output-2](output/random-ellsworth-kelly-49331630472-resized.png)
 
-![output-2](output/random-ellsworth-kelly-49331630472.png)
-
-![output-3](output/random-ellsworth-kelly-71063663002.png)
-
-![output-4](output/random-ellsworth-kelly-72549162660.png)
+![output-3](output/random-ellsworth-kelly-71063663002-resized.png)
+![output-4](output/random-ellsworth-kelly-72549162660-resized.png)
 
 ## Sources
 
