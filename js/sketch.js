@@ -167,11 +167,11 @@ class Sketch extends Engine {
   // generate the texture for the background
   _texture(seed) {
     this.ctx.save();
-    this.ctx.globalCompositeOperation = "multiply";
+    this.ctx.globalCompositeOperation = "luminosity";
     for (let x = 0; x < this.width; x += this._texture_scl) {
       for (let y = 0; y < this.height; y += this._texture_scl) {
-        const lightness = (this._noise(x, y, seed, 5000, this._texture_noise_scl) + 1) / 2 * 100 + 20;
-        const alpha = 0.2;
+        const lightness = (this._noise(x, y, seed, 5000, this._texture_noise_scl) + 1) / 2 * 80 + 20;
+        const alpha = 0.1;
         this.ctx.save();
         this.ctx.fillStyle = `hsla(45, 40%, ${lightness}%, ${alpha})`;
         this.ctx.fillRect(x, y, this._texture_scl, this._texture_scl);
