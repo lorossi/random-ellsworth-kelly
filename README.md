@@ -7,10 +7,14 @@
 Ellsworth Kelly has been an american painter and sculptor that I discovered by mistake while mindlessly scrolling through my Instagram feed.
 He became famous thanks to his beautiful style, now called *"hard-edge painting"*, where each of his canvas was composed by simple color palettes and shapes all abruptly interrupting each other.
 
-![spectrum-colors](sources/spectrum-IX.jpg | width=200)
-![spectrum-colors-arranged](sources/spectrum-colors-arranged-by-chance-2.jpg | width=200)
+![spectrum-colors](sources/spectrum-IX-resized.jpg)
+![spectrum-colors-arranged](sources/spectrum-colors-arranged-by-chance-2-resized.jpg)
 
+*Spectrum colors* and *Spectrum colors arranged by chance* are perhaps two of his most famous works.
 Needless to say, I instantly fell in love with its minimalistic paintings and *I HAD TO* try and replicate his work in some form of automated way.
+
+*Why?* , I hear you asking.
+Well, all I know is that *I had to*.
 
 Each painting is completely unique and will never be replicated.
 In order to achieve that goal, I implemented my own version of the `XOR128` random algorithm.
