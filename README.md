@@ -1,6 +1,6 @@
 # Random Ellsworth Kelly
 
-## Try it here! [lorenzoros.si](https://www.lorenzoros.si/ellsworth-kelly)
+## Try it here! [lorenzoros.si](https://www.lorenzoros.si/random-ellsworth-kelly)
 
 ## Background
 
