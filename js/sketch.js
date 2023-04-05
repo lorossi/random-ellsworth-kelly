@@ -13,9 +13,16 @@ class Sketch extends Engine {
     this._d_sat = 5; // max saturation variation
     this._d_light = 5; // max light variation
     this._d_color = 5; // max r, g, b channel variation
-    this._rect_noise_scl = 1;
+    this._rect_noise_scl = 2.5;
     this._texture_noise_scl = 0.0025;
     this._border = 0.1;
+
+    document.querySelector("#download").addEventListener("click", () => {
+      // generate file title
+      const file_title = `random-ellsworth-kelly-${this._canvas_title}`;
+      // actual download
+      this.saveFrame(file_title);
+    });
   }
 
   setup() {
@@ -42,12 +49,12 @@ class Sketch extends Engine {
 
   draw() {
     // seed generation - equals the epoch
-    const seed = Date.now();
+    const seed = Date.now() / 1e3;
 
     // setup noise
     this._simplex = new SimplexNoise(seed);
     // setup random
-    this._xor128 = new XOR128(seed, seed + 1, seed + 2, seed + 3);
+    this._xor128 = new XOR128(seed);
     // init variables
     const d_hue = this._random();
     const d_sat = this._random();
@@ -167,7 +174,7 @@ class Sketch extends Engine {
 
   // generate noise, scaled to noise_scl so you don't have to multiply each time
   _noise(x = 0, y = 0, z = 0, w = 0, scl = 0.1) {
-    return this._simplex.noise4D(x * scl, y * scl, z * scl, w * scl);
+    return this._simplex.noise(x * scl, y * scl, z * scl, w * scl);
   }
 
   // returns a random number between 0 and 1
@@ -179,7 +186,7 @@ class Sketch extends Engine {
   // we are using a seeded title and noise function
   _title(seed) {
     // title generated from noise function
-    let title = (this._noise(seed, Math.PI, Math.E, Math.SQRT1_2) + 1) / 2;
+    let title = (this._noise(seed) + 1) / 2;
     // round it to desired digits
     title = Math.floor(title * 10 ** this._title_length)
       .toString()
@@ -210,12 +217,5 @@ class Sketch extends Engine {
 
   click() {
     this.loop();
-  }
-
-  download() {
-    // generate file title
-    const file_title = `random-ellsworth-kelly-${this._canvas_title}`;
-    // actual download
-    this.saveAsImage(file_title);
   }
 }
