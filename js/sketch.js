@@ -17,15 +17,6 @@ class Sketch extends Engine {
     this._texture_noise_scl = 0.0025;
     this._border = 0.1;
 
-    document.querySelector("#download").addEventListener("click", () => {
-      // generate file title
-      const file_title = `random-ellsworth-kelly-${this._canvas_title}`;
-      // actual download
-      this.saveFrame(file_title);
-    });
-  }
-
-  setup() {
     // maximum distance between rectangle and center
     this._max_dist = this.width;
     // title length
@@ -45,23 +36,41 @@ class Sketch extends Engine {
       "#fa8c00",
       "#fa8c00",
     ];
+
+    this._recording = false;
+
+    document.querySelector("#download").addEventListener("click", () => {
+      // generate file title
+      const file_title = `random-ellsworth-kelly-${this._canvas_title}`;
+      // actual download
+      this.saveFrame(file_title);
+    });
+  }
+
+  setup() {
+    // stop looping and draw only once
+    this.noLoop();
+
+    // seed generation - equals the epoch
+    this._seed = this._recording ? Math.random() : Date.now() % 2 ** 32;
+    // setup noise
+    this._simplex = new SimplexNoise(this._seed);
+    // setup random
+    this._xor128 = new XOR128(this._seed);
+
+    // generate title
+    this._canvas_title = this._title(this._seed);
+    // set page title
+    document.title = this._canvas_title;
+
+    this.draw();
   }
 
   draw() {
-    // seed generation - equals the epoch
-    const seed = Date.now() / 1e3;
-
-    // setup noise
-    this._simplex = new SimplexNoise(seed);
-    // setup random
-    this._xor128 = new XOR128(seed);
     // init variables
     const d_hue = this._random();
     const d_sat = this._random();
     const d_light = this._random();
-    this._canvas_title = this._title(seed);
-    // set page title
-    document.title = this._canvas_title;
 
     this.ctx.save();
     this.background("#fbefdf");
@@ -84,7 +93,7 @@ class Sketch extends Engine {
           Math.abs(y + this._scl / 2 - this.height / 2);
         const dist_percent = rect_dist / this._max_dist;
         // noise relative to position
-        const n = ease((this._noise(x, y, seed) + 1) / 2);
+        const n = ease((this._noise(x, y, this._seed) + 1) / 2);
         // there's a lower chance for far rectangles to be shown
         if (n >= dist_percent) {
           // select color from palette
@@ -113,16 +122,37 @@ class Sketch extends Engine {
               sub_color.l += d_light;
               // add rect r, g, b variance
               sub_color.r +=
-                this._noise(x + xr, y + yr, seed, 1000, this._rect_noise_scl) *
-                this._d_color;
+                this._noise(
+                  x + xr,
+                  y + yr,
+                  this._seed,
+                  1000,
+                  this._rect_noise_scl
+                ) * this._d_color;
               sub_color.g +=
-                this._noise(x + xr, y + yr, seed, 2000, this._rect_noise_scl) *
-                this._d_color;
+                this._noise(
+                  x + xr,
+                  y + yr,
+                  this._seed,
+                  2000,
+                  this._rect_noise_scl
+                ) * this._d_color;
               sub_color.b +=
-                this._noise(x + xr, y + yr, seed, 3000, this._rect_noise_scl) *
-                this._d_color;
+                this._noise(
+                  x + xr,
+                  y + yr,
+                  this._seed,
+                  3000,
+                  this._rect_noise_scl
+                ) * this._d_color;
               sub_color.a +=
-                this._noise(x + xr, y + yr, seed, 4000, this._rect_noise_scl) *
+                this._noise(
+                  x + xr,
+                  y + yr,
+                  this._seed,
+                  4000,
+                  this._rect_noise_scl
+                ) *
                   0.2 +
                 0.8;
               // add rect s, l variance
@@ -138,7 +168,7 @@ class Sketch extends Engine {
           border_color.l = 0.2;
           border_color.a =
             Math.abs(
-              this._noise(x, y, seed, 5000, this._rect_noise_scl) * 0.1
+              this._noise(x, y, this._seed, 5000, this._rect_noise_scl) * 0.1
             ) + 0.05;
           this.ctx.strokeStyle = border_color.rgba;
           this.ctx.strokeRect(0, 0, this._scl, this._scl);
@@ -167,9 +197,6 @@ class Sketch extends Engine {
       this.height - right
     );
     this.ctx.restore();
-
-    // stop looping, restart with click
-    this.noLoop();
   }
 
   // generate noise, scaled to noise_scl so you don't have to multiply each time
@@ -184,11 +211,12 @@ class Sketch extends Engine {
 
   // generate the title by shuffling the seed. Once more is deterministic as
   // we are using a seeded title and noise function
-  _title(seed) {
+  _title() {
     // title generated from noise function
-    let title = (this._noise(seed) + 1) / 2;
     // round it to desired digits
-    title = Math.floor(title * 10 ** this._title_length)
+    const title = Math.floor(
+      ((this._noise(this._seed) + 1) / 2) * 10 ** this._title_length
+    )
       .toString()
       .padEnd(this._title_length, 0);
     this._xor128.shuffle_string(title);
@@ -216,6 +244,8 @@ class Sketch extends Engine {
   }
 
   click() {
-    this.loop();
+    // draw a new canvas
+    this.setup();
+    this.draw();
   }
 }
