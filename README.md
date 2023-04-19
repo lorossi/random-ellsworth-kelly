@@ -10,7 +10,7 @@ He is often associated with Color Field painting and Minimalism, but he is famou
 
 I find it very modern, if not futuristic, and I love how it's possible to create such a beautiful piece of art with so few elements, placed with such precision.
 
-*Spectrum Colors IX* (on the left) and *Spectrum Colors Arranged ny Chance* (on the right) are perhaps two of his most famous works.
+*Spectrum Colors IX* (on the left) and *Spectrum Colors Arranged by Chance* (on the right) are perhaps two of his most famous works.
 
 ![spectrum-colors](sources/spectrum-IX-resized.png) ![spectrum-colors-arranged](sources/spectrum-colors-arranged-by-chance-2-resized.png)
 
